@@ -4,25 +4,13 @@ import {
   ArrowDownToLine,
   ArrowRight,
   ArrowUpRight,
-  BookOpen,
   Check,
-  CheckCircle2,
   ChevronRight,
-  CircleHelp,
   Copy,
-  FlaskConical,
-  GraduationCap,
-  LayoutDashboard,
-  Leaf,
   Plus,
   RotateCcw,
-  Settings2,
-  ShieldCheck,
-  SlidersHorizontal,
   Trash2,
   Upload,
-  Users,
-  Wind,
   X,
 } from 'lucide-react';
 import {
@@ -50,6 +38,7 @@ import type { Classroom, Equipment, Scenario } from './model';
 import { optimize, roundRobin } from './optimizer';
 import type { Allocation } from './optimizer';
 import { allocationCsv, comparisonDescription } from './release';
+import EquipmentAnimation from './EquipmentAnimation';
 
 const STORAGE_KEY = 'cleanclass.scenario.v1';
 const money = (n: number) =>
@@ -64,11 +53,11 @@ const numberFrom = (event: ChangeEvent<HTMLInputElement>) =>
   event.target.value === '' ? NaN : Number(event.target.value);
 type Page = 'overview' | 'classrooms' | 'equipment' | 'scenarios' | 'method';
 const navigation = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'classrooms', label: 'Classroom planner', icon: GraduationCap },
-  { id: 'equipment', label: 'Equipment settings', icon: Settings2 },
-  { id: 'scenarios', label: 'Scenario comparison', icon: SlidersHorizontal },
-  { id: 'method', label: 'How it works', icon: BookOpen },
+  { id: 'overview', label: 'Overview' },
+  { id: 'classrooms', label: 'Classroom planner' },
+  { id: 'equipment', label: 'Equipment settings' },
+  { id: 'scenarios', label: 'Scenario comparison' },
+  { id: 'method', label: 'How it works' },
 ] as const;
 function initialState(): { scenario: Scenario; notice: string; persistence: boolean } {
   try {
@@ -83,34 +72,9 @@ function initialState(): { scenario: Scenario; notice: string; persistence: bool
     };
   }
 }
-function Metric({
-  label,
-  value,
-  detail,
-  icon,
-  accent = false,
-}: {
-  label: string;
-  value: ReactNode;
-  detail: string;
-  icon: ReactNode;
-  accent?: boolean;
-}) {
-  return (
-    <article className={`metric ${accent ? 'metric-accent' : ''}`}>
-      <div className="metric-label">
-        {label}
-        <span>{icon}</span>
-      </div>
-      <strong>{value}</strong>
-      <p>{detail}</p>
-    </article>
-  );
-}
 function Empty({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="empty">
-      <Wind size={30} />
       <h3>{title}</h3>
       <p>{children}</p>
     </div>
@@ -135,7 +99,12 @@ function InputField({
 }
 function AllocationTable({ allocation, target }: { allocation: Allocation; target: number }) {
   return (
-    <div className="table-scroll">
+    <div
+      className="table-scroll"
+      role="region"
+      aria-label="Classroom allocation table"
+      tabIndex={0}
+    >
       <table className="results-table">
         <caption className="sr-only">
           Recommended air purifier allocation, target {target} eACH
@@ -145,7 +114,8 @@ function AllocationTable({ allocation, target }: { allocation: Allocation; targe
             <th>Classroom</th>
             <th>Students</th>
             <th>Units</th>
-            <th>Before → after eACH</th>
+            <th>Before eACH</th>
+            <th>After eACH</th>
             <th>Target status</th>
           </tr>
         </thead>
@@ -160,8 +130,8 @@ function AllocationTable({ allocation, target }: { allocation: Allocation; targe
               <td>
                 <span className={`unit-pill ${r.units ? 'allocated' : ''}`}>{r.units}</span>
               </td>
-              <td>
-                {decimal(r.before)} <span className="muted">→</span>{' '}
+              <td>{decimal(r.before)}</td>
+              <td className="after-cell">
                 <strong>{decimal(r.after)}</strong>
               </td>
               <td>
@@ -196,9 +166,6 @@ function Explanation({ allocation, scenario }: { allocation: Allocation; scenari
   );
   return (
     <div className="explanation">
-      <div className="icon-tile">
-        <CircleHelp size={20} />
-      </div>
       <div>
         <h3>Why this allocation?</h3>
         <p>
@@ -428,14 +395,10 @@ export default function App() {
           }}
           aria-label="CleanClass overview"
         >
-          <span className="brand-icon">
-            <Wind size={25} />
-          </span>
           <span>
-            CleanClass<span className="brand-sub">SCHOOL AIR PLANNING</span>
+            CleanClass<span className="brand-sub">Classroom planning</span>
           </span>
         </a>
-        <div className="workspace-label">YOUR WORKSPACE</div>
         <nav aria-label="Main navigation">
           {navigation.map((item) => (
             <button
@@ -444,25 +407,31 @@ export default function App() {
               className={`nav-item ${page === item.id ? 'active' : ''}`}
               aria-current={page === item.id ? 'page' : undefined}
             >
-              <item.icon size={19} />
               <span>{item.label}</span>
-              {page === item.id && <span className="nav-dot" />}
             </button>
           ))}
         </nav>
+        <label className="mobile-section">
+          <span>Section</span>
+          <select value={page} onChange={(e) => navigate(e.target.value as Page)}>
+            {navigation.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="sidebar-bottom">
           <div className="purpose-note">
-            <Leaf size={22} />
-            <h3>Every classroom counts.</h3>
-            <p>A clearer plan for the air your students share.</p>
+            <h3>Understand the recommendation</h3>
+            <p>Review the calculation, assumptions, and scientific references.</p>
             <button onClick={() => navigate('method')}>
-              Explore the methodology <ArrowUpRight size={14} />
+              Read the methodology <ArrowUpRight size={14} />
             </button>
           </div>
           <div className="local-note">
-            <ShieldCheck size={16} />
             <span>
-              Private by design<small>Calculations stay in your browser</small>
+              Stored locally<small>Calculations run in your browser</small>
             </span>
           </div>
         </div>
@@ -470,7 +439,7 @@ export default function App() {
       <div className="main-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            Workspace <ChevronRight size={14} />
+            CleanClass <ChevronRight size={14} />
             <strong>School air plan</strong>
           </div>
           <div className="topbar-right">
@@ -478,34 +447,33 @@ export default function App() {
               <span className={`status-dot ${saved ? 'green' : ''}`} />
               {saved ? 'Saved on this device' : persistence ? 'Unsaved changes' : 'Session only'}
             </span>
-            <span className="avatar" aria-label="School workspace">
-              <GraduationCap size={18} />
-            </span>
           </div>
         </header>
         <main id="main-content">
-          <div className="page-heading">
+          <div className={`page-heading${page === 'overview' ? ' overview-heading' : ''}`}>
             <div>
-              <div className="eyebrow">SMARTER AIR. HEALTHIER LEARNING SPACES.</div>
               <h1 ref={heading} tabIndex={-1}>
-                {navigation.find((n) => n.id === page)?.label}
+                {page === 'overview'
+                  ? 'Classroom air allocation'
+                  : navigation.find((n) => n.id === page)?.label}
               </h1>
               <p>
                 {page === 'overview'
-                  ? "Cleaner air shouldn't depend on guesswork. Make better use of limited air-cleaning budgets."
+                  ? 'Allocate your equipment budget across classrooms and compare estimated clean-air improvements.'
                   : page === 'classrooms'
-                    ? 'Start with your spaces. Better inputs make a better plan.'
+                    ? 'Enter room dimensions, occupancy, and estimated existing ventilation.'
                     : page === 'equipment'
                       ? 'Set the equipment, budget, and clean-air target for your school.'
                       : page === 'scenarios'
-                        ? 'Explore the impact of your budget before making a purchase.'
-                        : 'Transparent math. Clear assumptions. Decisions you can explain.'}
+                        ? 'Compare optimized and round-robin allocations at different budgets.'
+                        : 'Review the calculation, assumptions, and sources behind your plan.'}
               </p>
             </div>
             <div className="heading-actions">
               <input
                 ref={fileInput}
                 type="file"
+                tabIndex={-1}
                 accept=".json,application/json"
                 onChange={importScenario}
                 className="sr-only"
@@ -533,6 +501,7 @@ export default function App() {
                 Export allocation CSV
               </button>
             </div>
+            {page === 'overview' && <EquipmentAnimation />}
           </div>
           {notice && (
             <div className="notice" role="status">
@@ -561,111 +530,123 @@ export default function App() {
 
           {page === 'overview' && (
             <>
-              <section className="plan-banner">
-                <div className="banner-illustration" aria-hidden="true">
-                  <Wind size={44} strokeWidth={1.4} />
-                  <span className="air-line" />
-                  <span className="air-line short" />
+              <section className="plan-facts" aria-label="School summary">
+                <dl>
+                  <div>
+                    <dt>Classrooms</dt>
+                    <dd>{scenario.rooms.length}</dd>
+                  </div>
+                  <div>
+                    <dt>Student seats</dt>
+                    <dd>{occupancy.toLocaleString()}</dd>
+                  </div>
+                  <div>
+                    <dt>Equipment budget</dt>
+                    <dd>
+                      {Number.isFinite(scenario.equipment.budget)
+                        ? money(scenario.equipment.budget)
+                        : 'Unavailable'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Selected target</dt>
+                    <dd>
+                      {Number.isFinite(scenario.equipment.target)
+                        ? scenario.equipment.target + ' eACH'
+                        : 'Unavailable'}
+                    </dd>
+                  </div>
+                </dl>
+                {unknown > 0 && (
+                  <p>{unknown} classroom(s) excluded until baseline ACH is estimated.</p>
+                )}
+              </section>
+              <section className="allocation-report" aria-label="Allocation summary">
+                <div className="report-heading">
+                  <h2>Recommended allocation</h2>
+                  <button
+                    className="button primary"
+                    onClick={runOptimization}
+                    disabled={!valid || busy || !scenario.rooms.length}
+                  >
+                    {busy ? 'Calculating…' : 'Optimize Allocation'}
+                    {!busy && <ArrowRight size={17} />}
+                  </button>
                 </div>
-                <div className="banner-copy">
-                  <span className="eyebrow">A LITTLE EQUIPMENT. A BIGGER IMPACT.</span>
-                  <h2>Put cleaner air where it counts.</h2>
-                  <p>
-                    Find the allocation that brings the most student seats into classrooms meeting
-                    your selected target.
-                  </p>
-                  <div className="banner-tags">
-                    <span>
-                      <CheckCircle2 size={14} />
-                      Real optimization
-                    </span>
-                    <span>
-                      <ShieldCheck size={14} />
-                      No data leaves your device
-                    </span>
+                <p className="calculation-state">
+                  {current
+                    ? JSON.stringify([scenario.rooms, scenario.equipment]) ===
+                      JSON.stringify([demoScenario().rooms, demoScenario().equipment])
+                      ? 'Calculated from demonstration inputs.'
+                      : 'Calculated from the current inputs.'
+                    : 'Inputs changed. Run optimization to refresh the recommendation.'}
+                </p>
+                <div className="report-body">
+                  <div className="report-explanation">
+                    {allocation ? (
+                      <>
+                        <p className="allocation-outcome">
+                          <strong>{allocation.newStudents} additional student seats</strong> in
+                          classrooms estimated to meet {scenario.equipment.target} eACH.
+                        </p>
+                        <p>
+                          Purchase {allocation.units} purifiers for {money(allocation.cost)}.
+                          Equipment cost excludes operation and maintenance.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="allocation-outcome">
+                        Run optimization to calculate a recommendation for these classrooms.
+                      </p>
+                    )}
+                    <button className="text-button" onClick={() => navigate('equipment')}>
+                      Review equipment settings <ArrowRight size={14} />
+                    </button>
+                  </div>
+                  <div
+                    className="report-comparison"
+                    role="region"
+                    aria-label="Before and after target attainment"
+                    tabIndex={0}
+                  >
+                    <table>
+                      <caption className="sr-only">
+                        Estimated target attainment before and after allocation
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">At selected target</th>
+                          <th scope="col">Before</th>
+                          <th scope="col">After</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th scope="row">Classrooms</th>
+                          <td>
+                            {baseline ? baseline.beforeRooms : 'Unavailable'} /{' '}
+                            {scenario.rooms.length}
+                          </td>
+                          <td>
+                            {allocation
+                              ? allocation.afterRooms + ' / ' + scenario.rooms.length
+                              : 'Recalculate'}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">Student seats</th>
+                          <td>{baseline ? baseline.beforeStudents : 'Unavailable'}</td>
+                          <td>{allocation ? allocation.afterStudents : 'Recalculate'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <button
-                  className="button primary"
-                  onClick={runOptimization}
-                  disabled={!valid || busy || !scenario.rooms.length}
-                >
-                  <Wind size={18} />
-                  {busy ? 'Calculating…' : 'Optimize Allocation'}
-                  {!busy && <ArrowRight size={17} />}
-                </button>
-              </section>
-              <div className="section-kicker">
-                <span>YOUR SCHOOL AT A GLANCE</span>
-                <span className="subtle">
-                  {current
-                    ? 'Based on your current plan'
-                    : 'Inputs changed · optimize to update results'}
-                </span>
-              </div>
-              <section className="metrics" aria-label="School summary">
-                <Metric
-                  label="Classrooms"
-                  value={scenario.rooms.length}
-                  detail={`${unknown} with unknown baseline ACH`}
-                  icon={<GraduationCap size={17} />}
-                />
-                <Metric
-                  label="Student occupancy"
-                  value={occupancy.toLocaleString()}
-                  detail="Seats across all classrooms"
-                  icon={<Users size={17} />}
-                />
-                <Metric
-                  label="Equipment budget"
-                  value={
-                    Number.isFinite(scenario.equipment.budget)
-                      ? money(scenario.equipment.budget)
-                      : '—'
-                  }
-                  detail="Purchase cost only"
-                  icon={<Settings2 size={17} />}
-                />
-                <Metric
-                  label="At target · before"
-                  value={
-                    baseline ? (
-                      <>
-                        {baseline.beforeRooms}
-                        <em> / {scenario.rooms.length}</em>
-                      </>
-                    ) : (
-                      '—'
-                    )
-                  }
-                  detail={`Selected target: ${numeric(scenario.equipment.target)} eACH`}
-                  icon={<Wind size={17} />}
-                />
-                <Metric
-                  label="At target · after"
-                  value={
-                    allocation ? (
-                      <>
-                        {allocation.afterRooms}
-                        <em> / {scenario.rooms.length}</em>
-                      </>
-                    ) : (
-                      '—'
-                    )
-                  }
-                  detail={
-                    allocation
-                      ? `+${allocation.newStudents} student seats at target`
-                      : 'Run optimization to calculate'
-                  }
-                  icon={<CheckCircle2 size={17} />}
-                  accent
-                />
               </section>
               <section className="panel chart-panel">
                 <div className="panel-heading">
                   <div>
-                    <h2>A clearer picture, classroom by classroom</h2>
+                    <h2>Clean-air estimates by classroom</h2>
                     <p>Estimated equivalent air changes per hour (eACH)</p>
                   </div>
                   <span className="badge">
@@ -677,6 +658,7 @@ export default function App() {
                     <div
                       className="chart-wrap"
                       role="img"
+                      tabIndex={0}
                       aria-label="Before and after eACH by classroom. Exact values are available in the allocation table below."
                     >
                       <div
@@ -689,12 +671,12 @@ export default function App() {
                             margin={{ top: 20, right: 25, bottom: 10, left: -20 }}
                             barGap={5}
                           >
-                            <CartesianGrid vertical={false} stroke="#edf0ef" />
+                            <CartesianGrid vertical={false} stroke="#e8ecea" />
                             <XAxis
                               dataKey="name"
                               axisLine={false}
                               tickLine={false}
-                              tick={{ fill: '#737f7b', fontSize: 11 }}
+                              tick={{ fill: '#526460', fontSize: 12 }}
                               interval={0}
                               angle={chartData.length > 8 ? -25 : 0}
                               height={chartData.length > 8 ? 65 : 35}
@@ -702,38 +684,39 @@ export default function App() {
                             <YAxis
                               axisLine={false}
                               tickLine={false}
-                              tick={{ fill: '#737f7b', fontSize: 11 }}
+                              tick={{ fill: '#526460', fontSize: 12 }}
                             />
                             <Tooltip
                               cursor={{ fill: '#f3f7f5' }}
                               formatter={(value) => `${value} eACH`}
                               contentStyle={{
-                                borderRadius: 10,
+                                borderRadius: 2,
                                 border: '1px solid #dfe7e2',
                                 fontSize: 12,
                               }}
                             />
                             <Legend
-                              iconType="circle"
-                              iconSize={8}
+                              iconType="square"
+                              iconSize={10}
+                              itemSorter={(item) => (item.value === 'Before allocation' ? 0 : 1)}
                               wrapperStyle={{ fontSize: 12, paddingTop: 16 }}
                             />
                             <ReferenceLine
                               y={scenario.equipment.target}
-                              stroke="#7e9e6d"
+                              stroke="#9b7336"
                               strokeDasharray="5 5"
                             />
                             <Bar
                               dataKey="Before allocation"
-                              fill="#d6e2df"
-                              radius={[4, 4, 0, 0]}
+                              fill="#8296a2"
+                              radius={[0, 0, 0, 0]}
                               maxBarSize={32}
                               isAnimationActive={false}
                             />
                             <Bar
                               dataKey="After allocation"
-                              fill="#258576"
-                              radius={[4, 4, 0, 0]}
+                              fill="#176b5b"
+                              radius={[0, 0, 0, 0]}
                               maxBarSize={32}
                               isAnimationActive={false}
                             />
@@ -741,6 +724,10 @@ export default function App() {
                         </ResponsiveContainer>
                       </div>
                     </div>
+                    <p className="chart-note scroll-hint">
+                      Scroll sideways to view all classrooms. Exact values are in the allocation
+                      table below.
+                    </p>
                     {unknown > 0 && (
                       <p className="chart-note">
                         {unknown} classroom(s) with unknown baseline ACH are excluded from this
@@ -752,7 +739,7 @@ export default function App() {
                   <Empty
                     title={
                       scenario.rooms.length
-                        ? 'Your next allocation starts here'
+                        ? 'Recalculate your allocation'
                         : 'Add your first classroom'
                     }
                   >
@@ -775,7 +762,7 @@ export default function App() {
                 <>
                   <div className="allocation-heading">
                     <div>
-                      <h2>Your recommended allocation</h2>
+                      <h2>Classroom assignments</h2>
                       <p>
                         Equipment assigned to maximize student seats in rooms meeting the target.
                       </p>
@@ -817,11 +804,10 @@ export default function App() {
                   <Explanation allocation={allocation} scenario={scenario} />
                 </>
               )}
-              <button className="next-link" onClick={() => navigate('scenarios')}>
+              <button className="comparison-link" onClick={() => navigate('scenarios')}>
                 <span>
-                  <SlidersHorizontal size={19} />
-                  <strong>What could a different budget do?</strong> Compare optimized and
-                  round-robin allocations.
+                  <strong>Compare another budget</strong> Compare optimized and round-robin
+                  allocations.
                 </span>
                 <ArrowRight size={18} />
               </button>
@@ -831,11 +817,10 @@ export default function App() {
           {page === 'classrooms' && (
             <>
               <section className="info-strip">
-                <CircleHelp size={20} />
                 <p>
-                  <strong>Use estimates you can explain.</strong> Enter existing effective ACH from
-                  your school’s facilities team or an assessment. Leave it blank if unknown; that
-                  room will be excluded from numerical optimization.
+                  <strong>Baseline ventilation.</strong> Enter existing effective ACH from your
+                  school’s facilities team or an assessment. Leave it blank if unknown; that room
+                  will be excluded from numerical optimization.
                 </p>
               </section>
               <section className="panel">
@@ -856,7 +841,12 @@ export default function App() {
                   </button>
                 </div>
                 {scenario.rooms.length ? (
-                  <div className="table-scroll">
+                  <div
+                    className="table-scroll"
+                    role="region"
+                    aria-label="Editable classroom inputs"
+                    tabIndex={0}
+                  >
                     <table className="editor-table">
                       <caption className="sr-only">
                         Editable classroom measurements and baseline ventilation
@@ -944,7 +934,9 @@ export default function App() {
                               />
                             </td>
                             <td className="volume-cell">
-                              {Number.isFinite(volume(r)) ? volume(r).toLocaleString() : '—'}
+                              {Number.isFinite(volume(r))
+                                ? volume(r).toLocaleString()
+                                : 'Unavailable'}
                             </td>
                             <td>
                               <div className="row-actions">
@@ -1002,7 +994,6 @@ export default function App() {
                   onClick={runOptimization}
                   disabled={!valid || busy || !scenario.rooms.length}
                 >
-                  <Wind size={17} />
                   {busy ? 'Calculating…' : 'Optimize Allocation'}
                   <ArrowRight size={16} />
                 </button>
@@ -1018,7 +1009,6 @@ export default function App() {
                     <h2>Equipment & budget</h2>
                     <p>One configurable, generic purifier model</p>
                   </div>
-                  <Settings2 size={22} className="muted" />
                 </div>
                 <div className="settings-form">
                   <div className="form-grid">
@@ -1095,7 +1085,6 @@ export default function App() {
                     onClick={runOptimization}
                     disabled={!valid || busy || !scenario.rooms.length}
                   >
-                    <Wind size={17} />
                     {busy ? 'Calculating…' : 'Optimize Allocation'}
                     <ArrowRight size={16} />
                   </button>
@@ -1103,14 +1092,13 @@ export default function App() {
               </section>
               <aside>
                 <div className="assumption-card">
-                  <FlaskConical size={27} />
-                  <h2>A model, not a product endorsement.</h2>
+                  <h2>Example equipment</h2>
                   <p>
                     The demonstration uses a generic $300 purifier with a particle CADR of 300 cfm.
                     It does not represent a verified commercial product.
                   </p>
                   <hr />
-                  <h3>Make your estimate realistic</h3>
+                  <h3>Selecting a CADR estimate</h3>
                   <p>
                     Use CADR at the speed your classroom can tolerate. Placement, mixing, noise,
                     filter condition, and actual performance affect delivered clean air.
@@ -1144,7 +1132,7 @@ export default function App() {
                     Remember inputs in this browser
                   </label>
                   <p>
-                    Shared device? Turn this off. Export JSON whenever you want a portable copy.
+                    Disable local saving on shared devices. Export JSON to keep a portable copy.
                   </p>
                 </section>
               </aside>
@@ -1156,7 +1144,7 @@ export default function App() {
               <section className="panel budget-panel">
                 <div className="panel-heading">
                   <div>
-                    <h2>Find your budget’s potential</h2>
+                    <h2>Compare allocations by budget</h2>
                     <p>Move the slider to calculate a new allocation for both strategies.</p>
                   </div>
                   <span className="badge">Exploration · current plan unchanged</span>
@@ -1217,11 +1205,7 @@ export default function App() {
                   <div className="comparison-grid">
                     <section className="panel strategy-card optimized">
                       <div className="strategy-title">
-                        <span className="icon-tile">
-                          <Wind size={22} />
-                        </span>
                         <div>
-                          <span className="eyebrow">RECOMMENDED STRATEGY</span>
                           <h2>Optimized allocation</h2>
                         </div>
                       </div>
@@ -1252,11 +1236,7 @@ export default function App() {
                     </section>
                     <section className="panel strategy-card">
                       <div className="strategy-title">
-                        <span className="icon-tile neutral">
-                          <RotateCcw size={22} />
-                        </span>
                         <div>
-                          <span className="eyebrow">COMPARISON BASELINE</span>
                           <h2>Round-robin allocation</h2>
                         </div>
                       </div>
@@ -1287,13 +1267,12 @@ export default function App() {
                     </section>
                   </div>
                   <div className="comparison-insight">
-                    <Leaf size={21} />
                     <p>{comparisonDescription(compare.optimized, compare.naive, compareBudget)}</p>
                   </div>
                   <section className="panel">
                     <div className="panel-heading">
                       <div>
-                        <h2>How the opportunity changes</h2>
+                        <h2>Target attainment across budgets</h2>
                         <p>Student seats in rooms meeting the target, across 21 sampled budgets</p>
                       </div>
                     </div>
@@ -1313,15 +1292,19 @@ export default function App() {
                             type="number"
                             domain={[0, sliderMax]}
                             tickFormatter={(n) => money(Number(n))}
-                            tick={{ fontSize: 11 }}
+                            tick={{ fill: '#526460', fontSize: 12 }}
                             axisLine={false}
                             tickLine={false}
                           />
-                          <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <YAxis
+                            tick={{ fill: '#526460', fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
                           <Tooltip
                             labelFormatter={(n) => money(Number(n))}
                             contentStyle={{
-                              borderRadius: 10,
+                              borderRadius: 2,
                               border: '1px solid #dfe7e2',
                               fontSize: 12,
                             }}
@@ -1339,7 +1322,7 @@ export default function App() {
                           <Line
                             type="stepAfter"
                             dataKey="Round robin"
-                            stroke="#9dada7"
+                            stroke="#728a82"
                             strokeWidth={2}
                             strokeDasharray="5 4"
                             dot={false}
@@ -1368,9 +1351,8 @@ export default function App() {
                 </>
               )}
               <section className="info-strip">
-                <CircleHelp size={20} />
                 <p>
-                  <strong>A fair comparison.</strong> Round robin assigns one unit per pass in
+                  <strong>Round-robin method.</strong> Round robin assigns one unit per pass in
                   classroom table order, skipping rooms with unknown baseline ACH or those already
                   at target. It stops assigning to a room at its target or limit. Both strategies
                   use identical budgets, CADR, unit cost, room limits, and formulas.
@@ -1382,8 +1364,7 @@ export default function App() {
           {page === 'method' && (
             <div className="method-grid">
               <section className="panel method-main">
-                <span className="eyebrow">THE MATH BEHIND YOUR PLAN</span>
-                <h2>Simple inputs. Transparent calculations.</h2>
+                <h2>How the estimate is calculated</h2>
                 <p>
                   CleanClass estimates how portable particle filtration adds to a room’s existing
                   effective clean-air rate. It then chooses the combination of rooms that brings the
@@ -1477,7 +1458,6 @@ export default function App() {
                   predict infections or measured health outcomes.
                 </p>
                 <div className="method-disclaimer">
-                  <ShieldCheck size={23} />
                   <p>
                     CleanClass is a planning and educational application. It is not a sensor,
                     clinical instrument, code-compliance assessment, or guarantee of protection from
@@ -1488,8 +1468,7 @@ export default function App() {
               </section>
               <aside>
                 <div className="assumption-card">
-                  <Leaf size={28} />
-                  <h2>Better decisions start with visible assumptions.</h2>
+                  <h2>Calculation assumptions</h2>
                   <p>
                     Every recommendation is calculated locally from your classroom inputs. No
                     external APIs, accounts, or background data collection.
@@ -1515,12 +1494,11 @@ export default function App() {
           )}
           <footer>
             <span>
-              <Wind size={16} />
               <strong>CleanClass</strong>
-              <span>Smarter air. Healthier learning spaces.</span>
+              <span>Classroom air planning</span>
             </span>
             <span>
-              Planning estimates, not safety guarantees.
+              Planning estimates; performance varies in practice.
               <button onClick={() => navigate('method')}>
                 Read the methodology <ArrowUpRight size={13} />
               </button>
@@ -1554,9 +1532,6 @@ export default function App() {
               }
             }}
           >
-            <span className="icon-tile">
-              <RotateCcw size={22} />
-            </span>
             <h2 id="reset-title">Load the demonstration scenario?</h2>
             <p>
               This replaces your current classrooms and equipment settings. Export JSON first if you
