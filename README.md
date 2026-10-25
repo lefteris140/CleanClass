@@ -41,6 +41,24 @@ Input limits (100 rooms, 20 units per room) bound the dynamic program to at most
 
 The comparison strategy assigns one unit per eligible classroom per pass in table order until the budget runs out or all rooms meet their targets or caps. It skips unknown baselines and rooms already at target. It can leave partially improved rooms, whereas the optimizer purchases only allocations that reach the target. Both strategies use identical equipment, budget, eligibility, limits, and clean-air formulas.
 
+## Ventilation sensitivity analysis (V1.5)
+
+In **Scenario comparison → Test ventilation assumptions**, choose a hypothetical additive change in baseline effective ACH. Use the slider for illustrative −2 to +2 eACH changes, or enter a number directly. **Restore original assumptions** immediately returns to zero. The adjustment is a user-selected scenario, not a scientifically validated uncertainty interval, confidence interval, measured error, or probability distribution.
+
+The analysis makes an immutable copy of the current main scenario, adds the adjustment to each known baseline, and preserves unknown baselines as unknown. Adjustments that put any known baseline outside the supported 0–50 range are rejected, never clamped. Dimensions, student occupancy, purifier CADR and cost, target, budget, room limits, and classroom order stay constant. Saved inputs and exports are unaffected. Editing inputs invalidates the cached main recommendation and hides sensitivity results until the plan is recalculated.
+
+The interface separates three results: the original plan under original assumptions, that same equipment allocation evaluated under changed assumptions using the existing summary function, and a new allocation calculated with the existing exact optimizer under the changed assumptions. Its table shows seats and classrooms at target, purchase cost, original and new unit counts, estimated final eACH, target statuses, and changed recommendations. This uses the **main plan budget**, independently of the budget comparison control below it.
+
+Different assumptions can change the integer number of purifiers needed for a room to reach the target or which rooms already meet it. This changes the combinations available to the existing knapsack objective. It does not mean the optimizer purchases every partial clean-air improvement. Changed recommendations are explained with calculated unit requirements and the global objective, without asserting a unique causal reason for each selection.
+
+This exploration does not validate the model or ventilation measurements, establish a likely error range, prove a plan is robust to all conditions, predict infection prevention, or establish health improvement percentages. All results remain modeled planning estimates. Portable filtration does not substitute for adequate outdoor-air ventilation.
+
+The Overview keeps its animated schematic classroom in a compact results layout, with actual selected-room unit and before/after eACH readouts, an animation pause control, and reduced-motion support. The illustration is conceptual; its geometry and visible purifier model do not simulate measured classroom geometry, equipment counts, or physical airflow. Each allocation-table row offers a concrete explanation, including unknown estimates, rooms already at target, effective room limits, and rooms not selected under the resource constraints.
+
+### V1.5 judge walkthrough
+
+Start with the unchanged fictional demo: 133 seats at target, including 108 additional seats, for six purifiers costing $1,800. Switch the illustrated classroom and inspect its actual figures. In Scenario comparison, enter −0.5 eACH: the fixed original allocation reaches 108 seats; reoptimization reaches 109, moving one unit from Room 104 to Room 106. Restore zero to recover the original results. Enter −2 to demonstrate explicit rejection of negative baselines. Explain why these are hypothetical planning scenarios rather than measured uncertainty or health outcomes.
+
 ## Assumptions and limits
 
 This is a planning and educational application, not a sensor, clinical instrument, compliance assessment, or guarantee of protection from disease. The default 5 eACH target is an editable planning assumption. The model assumes well-mixed air and constant, additive clean-air delivery. CADR is a particle metric, not a measurement of gas removal. Baseline effective ACH should avoid double counting new filtration. Placement, noise, actual operating speed, filter condition, maintenance, and mixing affect real performance. Ask qualified facilities professionals to validate assumptions and equipment placement.
@@ -97,7 +115,7 @@ Import the same GitHub repository through Netlify's **Add new project → Import
 
 ## Verification
 
-`npm test` covers formulas, target boundaries, budget cents, room caps, unknown baselines, zero budget, empty schools, tie-breaking, imports, and round robin. The optimizer is also compared against exhaustive enumeration for 100 generated schools. Release tests cover CSV values/escaping, stale and invalid export rejection, unknown values, currency, spreadsheet formula-like names, and comparison equality/difference wording. `npm run build` checks strict TypeScript and generates a production bundle.
+`npm test` covers formulas, target boundaries, budget cents, room caps, unknown baselines, zero budget, empty schools, tie-breaking, imports, and round robin. The optimizer is also compared against exhaustive enumeration for 100 generated schools. Release tests cover CSV values/escaping, stale and invalid export rejection, unknown values, currency, spreadsheet formula-like names, and comparison equality/difference wording. Sensitivity tests additionally cover immutable perturbations, unknown values, boundary rejection, fixed-plan evaluation against manually calculated cases, unchanged constraints, feasibility, determinism, stale-plan invalidation, and input updates. Recommendation tests cover calculated explanations and all zero-unit categories. `npm run build` checks strict TypeScript and generates a production bundle.
 
 The user separately reports a successful external check against 500 independently enumerated small scenarios. Its checker and raw results are not included here; this is reported evidence, not a repository test or an independently reproduced release result.
 
@@ -125,5 +143,8 @@ React/React DOM, Tailwind, Recharts, Vite, Vitest, and Prettier are MIT licensed
 - `src/optimizer.test.ts`: mathematical and data validation tests.
 - `src/release.ts` and `src/release.test.ts`: guarded allocation CSV serialization and comparison wording with focused regression tests.
 - `src/styles.css`: responsive visual system and Tailwind entry point.
+- `src/OverviewHero.tsx`: compact results summary and selected-classroom animation readouts.
+- `src/sensitivity.ts`, `src/SensitivityPanel.tsx`, and `src/sensitivity.test.ts`: immutable ventilation scenarios, fixed-plan evaluation, reoptimization, comparison interface, and tests.
+- `src/recommendations.ts` and `src/recommendations.test.ts`: concrete classroom recommendation explanations and regression tests.
 
 Review the applicable contest requirements and document the student's actual contributions before submission. This release preparation preserves the existing optimizer and mathematical objective.

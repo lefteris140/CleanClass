@@ -38,7 +38,9 @@ import type { Classroom, Equipment, Scenario } from './model';
 import { optimize, roundRobin } from './optimizer';
 import type { Allocation } from './optimizer';
 import { allocationCsv, comparisonDescription } from './release';
-import EquipmentAnimation from './EquipmentAnimation';
+import OverviewHero from './OverviewHero';
+import SensitivityPanel from './SensitivityPanel';
+import { recommendationExplanation } from './recommendations';
 
 const STORAGE_KEY = 'cleanclass.scenario.v1';
 const money = (n: number) =>
@@ -97,7 +99,14 @@ function InputField({
     </label>
   );
 }
-function AllocationTable({ allocation, target }: { allocation: Allocation; target: number }) {
+function AllocationTable({
+  allocation,
+  equipment,
+}: {
+  allocation: Allocation;
+  equipment: Equipment;
+}) {
+  const target = equipment.target;
   return (
     <div
       className="table-scroll"
@@ -125,6 +134,10 @@ function AllocationTable({ allocation, target }: { allocation: Allocation; targe
               <td>
                 <strong>{r.room.name}</strong>
                 <small>{volume(r.room).toLocaleString()} ft³</small>
+                <details className="recommendation-details">
+                  <summary>Why this recommendation</summary>
+                  <p>{recommendationExplanation(r, equipment)}</p>
+                </details>
               </td>
               <td>{r.room.students}</td>
               <td>
@@ -223,6 +236,7 @@ export default function App() {
   const key = JSON.stringify(scenario);
   const current = result.key === key && valid;
   const allocation = current ? result.allocation : null;
+  const naive = useMemo(() => (valid ? roundRobin(scenario) : null), [scenario, valid]);
   const unknown = scenario.rooms.filter((r) => r.existingACH === null).length;
   const baseline = useMemo(
     () =>
@@ -450,7 +464,7 @@ export default function App() {
           </div>
         </header>
         <main id="main-content">
-          <div className={`page-heading${page === 'overview' ? ' overview-heading' : ''}`}>
+          <div className="page-heading">
             <div>
               <h1 ref={heading} tabIndex={-1}>
                 {page === 'overview'
@@ -465,7 +479,7 @@ export default function App() {
                     : page === 'equipment'
                       ? 'Set the equipment, budget, and clean-air target for your school.'
                       : page === 'scenarios'
-                        ? 'Compare optimized and round-robin allocations at different budgets.'
+                        ? 'Test ventilation assumptions and compare allocation strategies at different budgets.'
                         : 'Review the calculation, assumptions, and sources behind your plan.'}
               </p>
             </div>
@@ -501,7 +515,6 @@ export default function App() {
                 Export allocation CSV
               </button>
             </div>
-            {page === 'overview' && <EquipmentAnimation />}
           </div>
           {notice && (
             <div className="notice" role="status">
@@ -530,6 +543,17 @@ export default function App() {
 
           {page === 'overview' && (
             <>
+              <OverviewHero
+                scenario={scenario}
+                allocation={allocation}
+                baseline={baseline}
+                naive={current ? naive : null}
+                busy={busy}
+                valid={valid}
+                onOptimize={runOptimization}
+                onEquipment={() => navigate('equipment')}
+                onSensitivity={() => navigate('scenarios')}
+              />
               <section className="plan-facts" aria-label="School summary">
                 <dl>
                   <div>
@@ -560,88 +584,6 @@ export default function App() {
                 {unknown > 0 && (
                   <p>{unknown} classroom(s) excluded until baseline ACH is estimated.</p>
                 )}
-              </section>
-              <section className="allocation-report" aria-label="Allocation summary">
-                <div className="report-heading">
-                  <h2>Recommended allocation</h2>
-                  <button
-                    className="button primary"
-                    onClick={runOptimization}
-                    disabled={!valid || busy || !scenario.rooms.length}
-                  >
-                    {busy ? 'Calculating…' : 'Optimize Allocation'}
-                    {!busy && <ArrowRight size={17} />}
-                  </button>
-                </div>
-                <p className="calculation-state">
-                  {current
-                    ? JSON.stringify([scenario.rooms, scenario.equipment]) ===
-                      JSON.stringify([demoScenario().rooms, demoScenario().equipment])
-                      ? 'Calculated from demonstration inputs.'
-                      : 'Calculated from the current inputs.'
-                    : 'Inputs changed. Run optimization to refresh the recommendation.'}
-                </p>
-                <div className="report-body">
-                  <div className="report-explanation">
-                    {allocation ? (
-                      <>
-                        <p className="allocation-outcome">
-                          <strong>{allocation.newStudents} additional student seats</strong> in
-                          classrooms estimated to meet {scenario.equipment.target} eACH.
-                        </p>
-                        <p>
-                          Purchase {allocation.units} purifiers for {money(allocation.cost)}.
-                          Equipment cost excludes operation and maintenance.
-                        </p>
-                      </>
-                    ) : (
-                      <p className="allocation-outcome">
-                        Run optimization to calculate a recommendation for these classrooms.
-                      </p>
-                    )}
-                    <button className="text-button" onClick={() => navigate('equipment')}>
-                      Review equipment settings <ArrowRight size={14} />
-                    </button>
-                  </div>
-                  <div
-                    className="report-comparison"
-                    role="region"
-                    aria-label="Before and after target attainment"
-                    tabIndex={0}
-                  >
-                    <table>
-                      <caption className="sr-only">
-                        Estimated target attainment before and after allocation
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">At selected target</th>
-                          <th scope="col">Before</th>
-                          <th scope="col">After</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th scope="row">Classrooms</th>
-                          <td>
-                            {baseline ? baseline.beforeRooms : 'Unavailable'} /{' '}
-                            {scenario.rooms.length}
-                          </td>
-                          <td>
-                            {allocation
-                              ? allocation.afterRooms + ' / ' + scenario.rooms.length
-                              : 'Recalculate'}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row">Student seats</th>
-                          <td>{baseline ? baseline.beforeStudents : 'Unavailable'}</td>
-                          <td>{allocation ? allocation.afterStudents : 'Recalculate'}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
               </section>
               <section className="panel chart-panel">
                 <div className="panel-heading">
@@ -798,7 +740,7 @@ export default function App() {
                       </div>
                     </div>
                     {allocation.rooms.length > 0 && (
-                      <AllocationTable allocation={allocation} target={scenario.equipment.target} />
+                      <AllocationTable allocation={allocation} equipment={scenario.equipment} />
                     )}
                   </section>
                   <Explanation allocation={allocation} scenario={scenario} />
@@ -1141,6 +1083,11 @@ export default function App() {
 
           {page === 'scenarios' && (
             <>
+              <SensitivityPanel
+                scenario={scenario}
+                snapshot={result}
+                onOptimize={runOptimization}
+              />
               <section className="panel budget-panel">
                 <div className="panel-heading">
                   <div>
@@ -1345,7 +1292,7 @@ export default function App() {
                     </div>
                     <AllocationTable
                       allocation={compare.optimized}
-                      target={scenario.equipment.target}
+                      equipment={scenario.equipment}
                     />
                   </section>
                 </>
@@ -1416,7 +1363,8 @@ export default function App() {
                   delivery. Existing effective ACH should account for applicable outdoor air and
                   existing particle filtration without double counting the new equipment. CADR
                   measures particle removal; it does not establish removal of gases or all
-                  pollutants.
+                  pollutants. Portable filtration does not substitute for adequate outdoor-air
+                  ventilation.
                 </p>
                 <p>
                   Real performance varies with device placement, room mixing, operating speed,
