@@ -2,28 +2,18 @@
 
 Student developer: **Lefteris Demosthenous**
 
-## Version published in this repository
+## Independent CleanClass implementation
 
-This repository contains the AI-assisted CleanClass prototype and its subsequent release changes. Lefteris Demosthenous explicitly chose to publish this prototype for now. The independent rewrite reported below is a separate version and is not included in this repository. The prototype's generated code is not presented as independently written by the student.
+This disclosure describes my independently rewritten version of CleanClass. I rewrote the code myself using a different implementation while reproducing the same observed outputs as an earlier prototype.
 
-## Known workflow
+I used OpenAI Codex to help develop the idea, narrow it to the specific problem of allocating limited air-cleaning equipment across classrooms, and provide broad visual-design guidance. For my rewritten implementation, I also used Codex to help identify and fix bugs.
 
-CleanClass was developed with substantial assistance from OpenAI Codex. In the recorded development session, the user supplied the product brief and asked the assistant to implement it in the workspace. The assistant generated the initial React/TypeScript application, mathematical optimizer, interface, demonstration inputs, tests, styling, and README; installed dependencies; and ran builds, tests, and browser checks. It also corrected issues found during verification, including persistence behavior and mobile chart sizing.
+The independent implementation is my own rewrite; I am not claiming that it was developed without AI assistance. AI's role in that version was idea development, problem scoping, broad visual-design guidance, and debugging assistance.
 
-For this release, the user provided a narrowly scoped review request. Codex inspected the existing source and the specified CDC/EPA pages, added the scientific references, CSV export and relevant tests, corrected comparison wording, prepared licensing/attribution and release documentation, and ran verification. The optimizer's implementation and objective were preserved.
+## Earlier prototype and repository status
 
-The user reports that the existing optimizer passed an external check against 500 independently enumerated small scenarios. The external checker and its raw output were not supplied in this recorded workflow, so this document does not claim Codex independently ran or audited that check. The repository's own generated-scenario tests are separate.
+Codex generated an earlier CleanClass prototype, including its application code, optimizer, interface, tests, and documentation, and later made release changes to that prototype. That earlier AI-generated prototype is distinct from my independent rewrite.
 
-This disclosure does not establish eligibility under contest rules, student authorship, or copyright ownership. The student should review it for accuracy and disclose tools and assistance as required by the applicable submission form.
+**My independently rewritten source code will be added to this repository later. The repository currently contains the earlier AI-assisted prototype.** The description of my independent implementation above does not attribute the prototype's generated code to me as independently written code.
 
-## Student contributions and subsequent rewrite
-
-The student reports independently rewriting the prototype's code using a substantially different implementation while reproducing the same observed outputs. The student also reports using Codex to develop the idea, narrow it to a specific problem, and help with broad visual-design decisions.
-
-This account distinguishes the AI-generated prototype from the student's reported rewrite. The rewrite's source files and development history have not been provided for this repository review. Matching observed outputs does not by itself verify that two implementations are identical in every case.
-
-Independent mathematical derivations, specific testing performed personally, and additional assistance have not been specified by the student. This disclosure makes no claims about those activities beyond the separately reported external check described above.
-
-The known AI involvement therefore includes idea development, problem scoping, broad visual design, generation of the initial prototype, and the subsequent release changes and documentation described in this document. A later independent rewrite does not remove that earlier assistance from the development history.
-
-The student should retain the rewrite and relevant development history, review this disclosure against the version actually submitted, and be able to explain the equations, objective, constraints, exclusions, comparison strategy, and CSV safeguards in their own words.
+This disclosure was prepared with AI assistance from my description of my work. It should remain consistent with the source code and version ultimately submitted.
