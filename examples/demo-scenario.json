@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "equipment": {
+    "cost": 300,
+    "cadr": 300,
+    "maxUnits": 4,
+    "budget": 1800,
+    "target": 5
+  },
+  "rooms": [
+    {
+      "id": "room-101",
+      "name": "Room 101",
+      "length": 30,
+      "width": 25,
+      "height": 10,
+      "students": 28,
+      "existingACH": 2,
+      "maxUnits": null
+    },
+    {
+      "id": "room-102",
+      "name": "Room 102",
+      "length": 28,
+      "width": 24,
+      "height": 10,
+      "students": 26,
+      "existingACH": 3,
+      "maxUnits": null
+    },
+    {
+      "id": "room-103",
+      "name": "Room 103",
+      "length": 32,
+      "width": 28,
+      "height": 10,
+      "students": 30,
+      "existingACH": 1.5,
+      "maxUnits": null
+    },
+    {
+      "id": "room-104",
+      "name": "Room 104",
+      "length": 25,
+      "width": 24,
+      "height": 10,
+      "students": 24,
+      "existingACH": 4,
+      "maxUnits": null
+    },
+    {
+      "id": "room-105",
+      "name": "Room 105",
+      "length": 30,
+      "width": 26,
+      "height": 10,
+      "students": 27,
+      "existingACH": 2.5,
+      "maxUnits": null
+    },
+    {
+      "id": "room-106",
+      "name": "Room 106",
+      "length": 28,
+      "width": 25,
+      "height": 10,
+      "students": 25,
+      "existingACH": 5.2,
+      "maxUnits": null
+    },
+    {
+      "id": "room-107",
+      "name": "Science lab",
+      "length": 40,
+      "width": 30,
+      "height": 12,
+      "students": 32,
+      "existingACH": 1.8,
+      "maxUnits": null
+    },
+    {
+      "id": "room-108",
+      "name": "Art studio",
+      "length": 32,
+      "width": 25,
+      "height": 10,
+      "students": 22,
+      "existingACH": 3.2,
+      "maxUnits": null
+    }
+  ]
+}
