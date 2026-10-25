@@ -2,10 +2,12 @@
 
 Student developer: **Lefteris Demosthenous**
 
-## Independent CleanClass implementation
+## Development assistance
 
-This disclosure describes CleanClass. 
+I used OpenAI Codex to help develop the idea, narrow it to the specific problem of allocating limited air-cleaning equipment across classrooms, and provide broad visual-design guidance. I also used Codex for debugging assistance.
 
-I used OpenAI Codex to help develop the idea, narrow it to the specific problem of allocating limited air-cleaning equipment across classrooms, and provide broad visual-design guidance. For my rewritten implementation, I also used Codex to help identify and fix bugs.
+AI-generated application code, optimizer code, tests, styling, and documentation are present in the source currently published in this repository. Codex also helped implement and verify release changes, including scientific references, allocation CSV export, and comparison wording.
 
-I am not claiming that it was developed without AI assistance. AI's role was idea development, problem scoping, broad visual-design guidance, and debugging assistance.
+I have reported independently rewriting CleanClass using a different implementation. That rewritten source is not reflected in the repository's application-file changes as of this update. This disclosure should be updated when that code is committed so it accurately describes the version submitted.
+
+This disclosure was prepared with AI assistance from my description of my work and the repository's recorded development history.

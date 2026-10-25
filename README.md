@@ -80,7 +80,7 @@ git push origin v1.0.0
 gh release create v1.0.0 --title "CleanClass v1.0.0" --notes "Classroom planning release with modeled clean-air optimization, scientific references, CSV allocation export, and AI-assistance disclosure."
 ```
 
-If a repository has since been initialized, preserve its history/remotes rather than repeating initialization or creating a duplicate. The command syntax is documented by [GitHub CLI](https://cli.github.com/manual/gh_repo_create). The AI-assisted prototype is now uploaded to [lefteris140/CleanClass](https://github.com/lefteris140/CleanClass) as a private repository. This source upload does not deploy the application.
+If a repository has since been initialized, preserve its history/remotes rather than repeating initialization or creating a duplicate. The command syntax is documented by [GitHub CLI](https://cli.github.com/manual/gh_repo_create). The CleanClass source is available at [lefteris140/CleanClass](https://github.com/lefteris140/CleanClass) as a private repository. This source upload does not deploy the application.
 
 ### Deploy to Vercel
 
@@ -115,7 +115,7 @@ The user separately reports a successful external check against 500 independentl
 
 React/React DOM, Tailwind, Recharts, Vite, Vitest, and Prettier are MIT licensed; TypeScript is Apache-2.0; Lucide icons use ISC with Feather-derived MIT portions. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for exact direct-dependency acknowledgments and [public/third-party-notices.txt](public/third-party-notices.txt) for preserved installed production-dependency notices. Libraries, icon shapes, and third-party bundle contents retain their own licenses.
 
-[LICENSE](LICENSE) is an MIT license naming Lefteris Demosthenous, scoped to original project code the named holder has rights to license. It does not assert that the student independently authored all code or relicense third-party work. [AI_ASSISTANCE.md](AI_ASSISTANCE.md) records the known substantial Codex assistance, the student's report of a separate independent rewrite, and the explicit decision to publish this AI-assisted prototype for now. **The independent rewrite is not included in this repository.**
+[LICENSE](LICENSE) is an MIT license naming Lefteris Demosthenous, scoped to original project code the named holder has rights to license. It does not assert that the student independently authored all code or relicense third-party work. [AI_ASSISTANCE.md](AI_ASSISTANCE.md) describes the development assistance associated with the currently published source.
 
 ## Project structure
 
