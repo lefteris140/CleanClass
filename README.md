@@ -80,7 +80,7 @@ git push origin v1.0.0
 gh release create v1.0.0 --title "CleanClass v1.0.0" --notes "Classroom planning release with modeled clean-air optimization, scientific references, CSV allocation export, and AI-assistance disclosure."
 ```
 
-If a repository has since been initialized, preserve its history/remotes rather than repeating initialization or creating a duplicate. The command syntax is documented by [GitHub CLI](https://cli.github.com/manual/gh_repo_create). No GitHub publication was performed as part of this release preparation.
+If a repository has since been initialized, preserve its history/remotes rather than repeating initialization or creating a duplicate. The command syntax is documented by [GitHub CLI](https://cli.github.com/manual/gh_repo_create). The AI-assisted prototype is now uploaded to [lefteris140/CleanClass](https://github.com/lefteris140/CleanClass) as a private repository. This source upload does not deploy the application.
 
 ### Deploy to Vercel
 
